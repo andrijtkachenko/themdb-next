@@ -11,12 +11,13 @@ const StyledList = styled.ul`
 `;
 
 export const MovieList = ({ page, setPagesCount }) => {
-  const [movies, setMoives] = useState([]);
+  const [movies, setMovies] = useState([]);
+
   useEffect(() => {
     (async () => {
       const data = await getTopRated({ page });
       //   console.log(data);
-      setMoives(data.results);
+      setMovies(data.results);
       setPagesCount(data.total_pages);
     })();
   }, [page]);

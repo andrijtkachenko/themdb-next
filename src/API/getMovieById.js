@@ -17,15 +17,3 @@ export const getMovieById = async ({ id }) => {
     console.log(err);
   }
 };
-
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    return data.data;
-  } catch (err) {
-    console.log(err);
-  }
-};

@@ -3,82 +3,105 @@ import styled from "@emotion/styled";
 import { AiFillCaretRight, AiFillCaretLeft } from "react-icons/ai";
 
 const StyledControl = styled.div`
- margin-top: 50px;
- margin-bottom: 50px;
   display: flex;
   justify-content: center;
-  gap: 5px;
+  align-items: center;
+  gap: 8px;
+  margin: 40px 0;
+
   & button {
-    width: 30px;
-    height: 30px;
+    min-width: 40px;
+    height: 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #fff;
+    color: #111827;
+    cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-  & active {
-  background-color: black ;}
-`
+    transition: all 0.2s ease;
+    font-weight: 600;
+    padding: 0 12px;
+  }
 
+  & button:hover:not(:disabled) {
+    background: #f3f4f6;
+    transform: translateY(-1px);
+  }
 
-// 1 2 3 4 5 6 7 8 .. last
-export const Pagination = ({ pagesCount, setPage }) => {
+  & button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  & button.active {
+    background: #111827;
+    color: #fff;
+    border-color: #111827;
+  }
+`;
+
+export const Pagination = ({ pagesCount, setPage, page }) => {
   const [buttons, setButtons] = useState([]);
-  const [maxPage, setMaxPage] = useState(300);
-  useEffect(() => {
-    const arr = [];
-    const maxPage = pagesCount > 300 ? 300 : pagesCount;
+  const maxPage = Math.max(1, Math.min(pagesCount || 1, 300));
 
-    if (pagesCount > 10) {
-      if(page < 7) {}
-      for (let i = 1; i < 9; i++) {
+  useEffect(() => {
+    const safePage = Math.min(Math.max(1, Number(page) || 1), maxPage);
+    if (safePage !== page) {
+      setPage(safePage);
+    }
+
+    const arr = [];
+
+    if (maxPage <= 7) {
+      for (let i = 1; i <= maxPage; i += 1) {
         arr.push(i);
       }
-      arr.push("...");
-      arr.push(maxPage);
-    } else if(page > maxPage - 7) {
-       arr.push(maxPage - 7);
-       arr.push(maxPage - 6);
-       arr.push(maxPage - 5);
-       arr.push(maxPage - 4);
-       arr.push(maxPage - 3);
-       arr.push(maxPage - 2);
-       arr.push(maxPage - 1);
-       arr.push(maxPage);
+    } else if (safePage <= 4) {
+      arr.push(1, 2, 3, 4, 5, "...", maxPage);
+    } else if (safePage >= maxPage - 3) {
+      arr.push(1, "...", maxPage - 4, maxPage - 3, maxPage - 2, maxPage - 1, maxPage);
+    } else {
+      arr.push(1, "...", safePage - 1, safePage, safePage + 1, "...", maxPage);
     }
-    
-    else  {
-       arr.push(1);
-       arr.push("...");
-       arr.push(page - 2);
-       arr.push(page - 1);
-       arr.push(page);
-       arr.push(page + 1);
-       arr.push(page + 2);
-       arr.push("...");
-       arr.push(pagesCount);
-    }
-    setButtons(arr);
-  }, [pagesCount, page]);
 
-  const onButtonClick = (page) => {
-    setPage(page);
+    setButtons(arr);
+  }, [page, maxPage, setPage]);
+
+  const onButtonClick = (nextPage) => {
+    if (typeof nextPage === "number" && nextPage >= 1 && nextPage <= maxPage) {
+      setPage(nextPage);
+    }
   };
 
   return (
     <StyledControl>
-      <button On Click={() => setPage((prev) => prev - 1))}>
+      <button
+        type="button"
+        disabled={page <= 1}
+        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+      >
         <AiFillCaretLeft />
-      </button> 
-      {buttons.map((item) => (
-        <button className={item === page ? "active" : ""}
-         onClick={() => onButtonClick(item)} 
-         key={item === "..." ? Math.random() : item}>
+      </button>
+
+      {buttons.map((item, index) => (
+        <button
+          key={`${item}-${index}`}
+          type="button"
+          className={item === page ? "active" : ""}
+          onClick={() => onButtonClick(item)}
+          disabled={item === "..."}
+        >
           {item}
         </button>
       ))}
-      <button 
-      disabled={page === maxPage} 
-      onClick={() => setPage((prev) => prev + 1)} >
+
+      <button
+        type="button"
+        disabled={page >= maxPage}
+        onClick={() => setPage((prev) => Math.min(maxPage, prev + 1))}
+      >
         <AiFillCaretRight />
       </button>
     </StyledControl>
